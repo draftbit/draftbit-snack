@@ -2,13 +2,70 @@ import * as React from "react";
 import qs from "query-string";
 import QRCode from "qrcode.react";
 import { SnackSession } from "snack-sdk";
-import {
-  filesToSnackFileStructure,
-  importsToDependencies,
-  DRAFTBIT_MODULES,
-  INITIAL_LOADING_CODE,
-  EXPO_VERSION,
-} from "./expoSdkModules";
+
+const EXPO_VERSION = "37.0.0";
+
+/* A loading indicator screen while we sync rest of dependencies & modules */
+const INITIAL_LOADING_CODE = `
+import * as React from 'react';
+import { View, ActivityIndicator } from 'react-native';
+export default function App() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#5a45ff'}}>
+      <ActivityIndicator size='large' color='#FFF' />
+    </View>
+  )
+}
+`;
+
+function filesToSnackFileStructure(files) {
+  return files.reduce((structure, file) => {
+    structure[file.path] = {
+      name: file.name,
+      type: file.type,
+      contents: file.contents,
+    };
+
+    return structure;
+  }, {});
+}
+
+function importsToDependencies(imports) {
+  return imports.reduce((prev, cur) => {
+    prev[cur.package] = module;
+    return prev;
+  }, {});
+}
+
+/* Draftbit Specific Modules for Snack */
+const DRAFTBIT_MODULES = {
+  /* draftbit ui specific */
+  "@draftbit/ui": "37.0.0-dev.11",
+  "react-native-typography": "latest",
+  "react-request": "^3.1.2",
+  "react-native-webview": "latest",
+
+  /* navigation specfic */
+  "@react-navigation/native": "5.5.0",
+  "@react-navigation/stack": "5.4.1",
+  "@react-navigation/bottom-tabs": "5.5.0",
+
+  /* peerDependencies that should automatically be fetched */
+  // "react-native-maps": "latest",
+  // "react-native-svg": "latest",
+  // "@react-native-community/datetimepicker": "latest",
+  // "@react-native-community/masked-view": "latest",
+
+  /* navigation specific */
+  // "@react-navigation/native": "5.5.0",
+  // "@react-navigation/stack": "latest",
+  // "@react-navigation/bottom-tabs": "5.5.0",
+  // "react-native-safe-area-context": "^0.6.0",
+  // "react-native-screens": "^2.0.0",
+
+  /* wtf but its needed */
+  // "prop-types": "15.7.2",
+};
 
 // snack is proxied through draftbit as requested by tc & ide
 // const API_URL = "https://api.draftbit.com/graphql";
@@ -200,10 +257,14 @@ export default class DraftbitSnackSession extends React.PureComponent {
     // Makes Snack work better
     delete files["package.json"];
     await this._snack.session.sendCodeAsync({
-      ...files,
-      [path]: {
+      // ...files,
+      // [path]: {
+      //   type: "CODE",
+      //   contents: screenCode,
+      // },
+      "App.js": {
         type: "CODE",
-        contents: screenCode,
+        contents: INITIAL_LOADING_CODE,
       },
     });
   };
@@ -220,6 +281,7 @@ export default class DraftbitSnackSession extends React.PureComponent {
   }
 
   _syncDependenciesAsync = async (dependencies) => {
+    console.log("dependencies", dependencies);
     try {
       await this._snack.session.syncDependenciesAsync(
         dependencies,
@@ -369,7 +431,12 @@ export default class DraftbitSnackSession extends React.PureComponent {
       <div>
         {this.state.url ? <QRCode value={this.state.url} size={200} /> : null}
         <br />
+        <b>state</b>
+        <br />
         <pre>{JSON.stringify(this.state, null, 2)}</pre>
+        <b>props</b>
+        <br />
+        <pre>{JSON.stringify(this.props, null, 2)}</pre>
       </div>
     );
     // return this.props.children({
