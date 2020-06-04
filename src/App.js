@@ -82,7 +82,6 @@ const snackFiles = [
 
 function App() {
   const imports = [];
-
   const screen = snackFiles.find((s) => s.name == "BlankScreen.js");
 
   return (
@@ -90,7 +89,7 @@ function App() {
       <SnackSession
         appUuid="ZfIMPDXM"
         screenUuid="2cwaFK5z"
-        screenCode={screen.code}
+        screenCode={screen.contents}
         screenName="BlankScreen"
         screenSlug="BlankScreen"
         deviceId="abcchangeme"
