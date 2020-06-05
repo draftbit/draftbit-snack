@@ -40,7 +40,7 @@ function importsToDependencies(imports) {
 /* Draftbit Specific Modules for Snack */
 const DRAFTBIT_MODULES = {
   /* draftbit ui specific */
-  "@draftbit/ui": "37.0.0-dev.11",
+  "@draftbit/ui": "37.0.0-dev.12",
   "react-native-typography": "latest",
   "react-request": "^3.1.2",
   "react-native-webview": "latest",
@@ -257,15 +257,15 @@ export default class DraftbitSnackSession extends React.PureComponent {
     // Makes Snack work better
     delete files["package.json"];
     await this._snack.session.sendCodeAsync({
-      // ...files,
-      // [path]: {
-      //   type: "CODE",
-      //   contents: screenCode,
-      // },
-      "App.js": {
+      ...files,
+      [path]: {
         type: "CODE",
-        contents: INITIAL_LOADING_CODE,
+        contents: screenCode,
       },
+      // "App.js": {
+      //   type: "CODE",
+      //   contents: INITIAL_LOADING_CODE,
+      // },
     });
   };
 
